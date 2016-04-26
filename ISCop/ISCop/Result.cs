@@ -21,6 +21,11 @@ namespace ISCop
         public string Source { get; set; }
         public int Line { get; set; }
 
+        public Result(ResultType severity, string id, string name, string message, string package, string pipeline, string component)
+            : this(severity, id, name, message, package, pipeline + "/" + component, -1)
+        {
+        }
+
         public Result(ResultType severity, string id, string name, string message, string package, string source, int line)
         {
             this.Severity = severity;

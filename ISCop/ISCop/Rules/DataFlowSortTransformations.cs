@@ -24,8 +24,8 @@ namespace ISCop.Rules
                 int sortCount = 0;
                 foreach (IDTSComponentMetaData100 comp in mainPipe.ComponentMetaDataCollection)
                 {
-                    string key = PackageHelper.GetComponentKey(comp);
-                    if (PackageHelper.ComponentInfos[key].CreationName == PackageRule.SortComponentName)
+                    var compInfo = PackageHelper.GetComponentInfo(comp);
+                    if (compInfo != null && compInfo.CreationName == PackageRule.SortComponentName)
                     {
                         sortCount++;
 
@@ -33,12 +33,13 @@ namespace ISCop.Rules
                         IDTSComponentMetaData100 sourceComp = PackageHelper.TraceInputToSource(mainPipe, comp);
                         if (sourceComp != null)
                         {
-                            key = PackageHelper.GetComponentKey(sourceComp);
-                            if (PackageHelper.ComponentInfos[key].Name == PackageRule.OleDbSourceComponentName
-                                || PackageHelper.ComponentInfos[key].Name == PackageRule.AdoNetSourceComponentName)
+                            var sourceCompInfo = PackageHelper.GetComponentInfo(sourceComp);
+                            if (sourceCompInfo != null 
+                                && (sourceCompInfo.Name == PackageRule.OleDbSourceComponentName
+                                    || sourceCompInfo.Name == PackageRule.AdoNetSourceComponentName))
                             {
-                                var msg = string.Format(CultureInfo.CurrentCulture, "The {0} Sort transformation is operating on data provided from the {1} source. Rather than using the Sort transformation, which is fully blocking, the sorting should be performed using a WHERE clause in the source's SQL, and the IsSorted and SortKey properties should be set appropriately. Reference: http://msdn.microsoft.com/en-us/library/ms137653(SQL.90).aspx", sortCount, sourceComp.Name);
-                                this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, -1));
+                                var msg = string.Format(CultureInfo.CurrentCulture, "The {0} Sort transformation is operating on data provided from the {1} source. Rather than using the Sort transformation, which is fully blocking, the sorting should be performed using a WHERE clause in the source's SQL, and the IsSorted and SortKey properties should be set appropriately. Reference: http://msdn.microsoft.com/en-us/library/ms137653(SQL.90).aspx", comp.Name, sourceComp.Name);
+                                this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, comp.Name));
                             }
                         }
                     }

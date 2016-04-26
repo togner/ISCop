@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using log4net;
 using Microsoft.SqlServer.Dts.Pipeline.Wrapper;
 using Microsoft.SqlServer.Dts.Runtime;
 
@@ -12,7 +13,8 @@ namespace BIDSHelper.SSIS
         /// The specific type of managed component is identified by the UserComponentTypeName 
         /// custom property of the component.
         /// </summary>
-        public const string ManagedComponentWrapper = "{bf01d463-7089-41ee-8f05-0a6dc17ce633}";
+        private const string ManagedComponentWrapper = "{874F7595-FB5F-40FF-96AF-FBFF8250E3EF}"; //{bf01d463-7089-41ee-8f05-0a6dc17ce633}";
+        private const string ManagedComponentTypeNameField = "UserComponentTypeName";
 
         public const string PackageCreationName = "Package";
         public const string EventHandlerCreationName = "EventHandler";
@@ -21,15 +23,9 @@ namespace BIDSHelper.SSIS
         public const string ForLoopCreationName = "ForLoop";
         public const string ForEachLoopCreationName = "ForEachLoop";
 
-        /// <summary>
-        /// Private field for ComponentInfos property
-        /// </summary>
-        private static ComponentInfos componentInfos = new ComponentInfos();
-
-        /// <summary>
-        /// Private field for ComponentInfos property
-        /// </summary>
-        private static ComponentInfos controlInfos = new ComponentInfos();
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(PackageHelper));
+        private static Dictionary<string, ComponentInfo> _componentInfos = new Dictionary<string, ComponentInfo>();
+        private static Dictionary<string, ComponentInfo> _controlInfos = new Dictionary<string, ComponentInfo>();
 
         public static List<TaskHost> GetControlFlowObjects<T>(DtsContainer container)
         {
@@ -43,9 +39,7 @@ namespace BIDSHelper.SSIS
                     returnItems.AddRange(GetControlFlowObjects<T>(eh));
                 }
             }
-
             IDTSSequence sequence = (IDTSSequence)container;
-
             foreach (Executable exec in sequence.Executables)
             {
                 if (exec is IDTSSequence)
@@ -61,70 +55,64 @@ namespace BIDSHelper.SSIS
                     }
                 }
             }
-
             return returnItems;
         }
 
-        /// <summary>
-        /// Gets the cached collection of Pipeline ComponentInfo objects.
-        /// </summary>
-        /// <value>The ComponentInfos collection.</value>
-        public static ComponentInfos ComponentInfos
+        // Gets the cached Pipeline ComponentInfo object
+        public static ComponentInfo GetComponentInfo(IDTSComponentMetaData100 component)
         {
-            get
+            if (_componentInfos.Count == 0)
             {
-                if (componentInfos.Count == 0)
+                Application application = new Application();
+                PipelineComponentInfos pipelineComponentInfos = application.PipelineComponentInfos;
+                foreach (PipelineComponentInfo pipelineComponentInfo in pipelineComponentInfos)
                 {
-                    Application application = new Application();
-                    PipelineComponentInfos pipelineComponentInfos = application.PipelineComponentInfos;
-
-                    foreach (PipelineComponentInfo pipelineComponentInfo in pipelineComponentInfos)
+                    if (pipelineComponentInfo.ID == ManagedComponentWrapper)
                     {
-                        if (pipelineComponentInfo.ID == ManagedComponentWrapper)
-                        {
-                            componentInfos.Add(pipelineComponentInfo.CreationName, new ComponentInfo(pipelineComponentInfo));
-                        }
-                        else
-                        {
-                            componentInfos.Add(pipelineComponentInfo.ID, new ComponentInfo(pipelineComponentInfo));
-                        }
+                        _componentInfos.Add(pipelineComponentInfo.CreationName, new ComponentInfo(pipelineComponentInfo));
+                    }
+                    else
+                    {
+                        _componentInfos.Add(pipelineComponentInfo.ID, new ComponentInfo(pipelineComponentInfo));
                     }
                 }
-
-                return componentInfos;
             }
+            ComponentInfo result = null;
+            var key = PackageHelper.GetComponentKey(component);
+            if (!_componentInfos.TryGetValue(key, out result))
+            {
+                PackageHelper.Logger.WarnFormat("Component '{0}' has unsupported type '{1}'.", component.Name, key);
+            }
+            return result;
         }
 
-        /// <summary>
-        /// Gets the cached collection of Control Flow ComponentInfo objects.
-        /// </summary>
-        /// <value>The ComponentInfos collection.</value>
-        public static ComponentInfos ControlFlowInfos
+        // Gets the cached Control Flow ComponentInfo object
+        public static ComponentInfo TryGetControlFlowInfo(IDTSComponentMetaData100 component)
         {
-            get
+            if (_controlInfos.Count == 0)
             {
-                if (controlInfos.Count == 0)
+                Application application = new Application();
+                TaskInfos taskInfos = application.TaskInfos;
+                foreach (TaskInfo taskInfo in taskInfos)
                 {
-                    Application application = new Application();
-                    TaskInfos taskInfos = application.TaskInfos;
+                    ComponentInfo info = new ComponentInfo(taskInfo);
+                    _controlInfos.Add(taskInfo.CreationName, info);
 
-                    foreach (TaskInfo taskInfo in taskInfos)
+                    // Tasks can be created using the creation name or 
+                    // ID, so need both when they differ
+                    if (taskInfo.CreationName != taskInfo.ID)
                     {
-                        ComponentInfo info = new ComponentInfo(taskInfo);
-
-                        controlInfos.Add(taskInfo.CreationName, info);
-
-                        // Tasks can be created using the creation name or 
-                        // ID, so need both when they differ
-                        if (taskInfo.CreationName != taskInfo.ID)
-                        {
-                            controlInfos.Add(taskInfo.ID, info);                            
-                        }
+                        _controlInfos.Add(taskInfo.ID, info);                            
                     }
                 }
-
-                return controlInfos;
             }
+            ComponentInfo result = null;
+            var key = PackageHelper.GetComponentKey(component);
+            if (!_controlInfos.TryGetValue(key, out result))
+            {
+                PackageHelper.Logger.WarnFormat("Component '{0}' has unsupported type '{1}'.", component.Name, key);
+            }
+            return result;
         }
 
         /// <summary>
@@ -188,7 +176,6 @@ namespace BIDSHelper.SSIS
         public static string GetContainerKey(DtsContainer container)
         {
             string containerKey = container.CreationName;
-
             if (container is Package)
             {
                 containerKey = PackageHelper.PackageCreationName;
@@ -209,16 +196,15 @@ namespace BIDSHelper.SSIS
             {
                 containerKey = PackageHelper.ForEachLoopCreationName;
             }
-
             return containerKey;
         }
 
         public static string GetComponentKey(IDTSComponentMetaData100 component)
         {
             string key = component.ComponentClassID;
-            if (component.ComponentClassID == ManagedComponentWrapper)
+            if (component.ComponentClassID == PackageHelper.ManagedComponentWrapper)
             {
-                key = component.CustomPropertyCollection["UserComponentTypeName"].Value.ToString();
+                key = component.CustomPropertyCollection[PackageHelper.ManagedComponentTypeNameField].Value.ToString();
             }
             return key;
         }
@@ -241,7 +227,6 @@ namespace BIDSHelper.SSIS
                 }
             }
             return null;
-
         }
     }
 
@@ -252,7 +237,4 @@ namespace BIDSHelper.SSIS
         AM_SQLCOMMAND = 2,
         AM_SQLCOMMAND_VARIABLE = 3
     }
-
-    public class ComponentInfos : Dictionary<string, ComponentInfo>
-    { }
 }

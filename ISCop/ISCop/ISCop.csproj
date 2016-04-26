@@ -59,9 +59,11 @@
     <Compile Include="Result.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Rules\AccessMode.cs" />
     <Compile Include="Rules\DataFlowAsynchronousPaths.cs" />
     <Compile Include="Rules\DataFlowCount.cs" />
     <Compile Include="Rules\DataFlowSortTransformations.cs" />
+    <Compile Include="Rules\PackageProtectionLevel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

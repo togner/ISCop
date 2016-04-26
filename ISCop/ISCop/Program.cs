@@ -61,10 +61,20 @@ namespace ISCop
 
         private static IEnumerable<Result> Analyze(string ispacPath)
         {
+            bool ok = false;
             using (var proj = Project.OpenProject(ispacPath))
             {
                 foreach (var pkgItem in proj.PackageItems)
                 {
+                    if (pkgItem.StreamName == "OPTIONS_SCENARIOS_FINLIB.dtsx")
+                    {
+                        ok = true;
+                    }
+                    if (!ok)
+                    {
+                        continue;
+                    }
+
                     var pkg = pkgItem.Package;
                     Program.Logger.InfoFormat("Analyzing {0}...", pkg.Name);
 
@@ -86,7 +96,8 @@ namespace ISCop
                         new DataFlowCount(),
                         new DataFlowAsynchronousPaths(),
                         new AccessMode(),
-                        new DataFlowSortTransformations()
+                        new DataFlowSortTransformations(),
+                        new PackageProtectionLevel()
                     })
                     {
                         rule.Check(pkg);

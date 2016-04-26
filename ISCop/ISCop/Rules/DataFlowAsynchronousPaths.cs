@@ -24,12 +24,12 @@ namespace ISCop.Rules
                 int asyncCount = 0;
                 foreach (IDTSPath100 path in mainPipe.PathCollection)
                 {
-                    string key = PackageHelper.GetComponentKey(path.StartPoint.Component);
                     if (path.StartPoint.SynchronousInputID != 0)
                     {
                         continue;
                     }
-                    if (PackageHelper.ComponentInfos[key].ComponentType != DTSPipelineComponentType.SourceAdapter)
+                    var compInfo = PackageHelper.GetComponentInfo(path.StartPoint.Component);
+                    if (compInfo != null && compInfo.ComponentType != DTSPipelineComponentType.SourceAdapter)
                     {
                         asyncCount++;
                     }
