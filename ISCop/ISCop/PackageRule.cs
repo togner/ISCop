@@ -15,7 +15,7 @@ namespace ISCop
         public string Name { get; protected set; }
         public string Description { get; protected set; }
 
-        public PackageRule()
+        protected PackageRule()
         {
             this.Results = new List<Result>();
         }

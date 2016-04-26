@@ -11,8 +11,13 @@ namespace ISCop.Rules
             this.Description = "Validates that the ProtectionLevel property is set to DontSaveSensitive or ServerStorage";
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ServerStorage"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.Int32)"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "DontSaveSensitive")]
         public override void Check(Package package)
         {
+            if (package == null)
+            {
+                return;
+            }
             if (package.ProtectionLevel != DTSProtectionLevel.DontSaveSensitive
                 && package.ProtectionLevel != DTSProtectionLevel.ServerStorage)
             {

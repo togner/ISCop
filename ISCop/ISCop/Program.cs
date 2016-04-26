@@ -93,10 +93,10 @@ namespace ISCop
                     // Custom rules
                     foreach (var rule in new PackageRule[]
                     {
-                        new DataFlowCount(),
-                        new DataFlowAsynchronousPaths(),
+                        new DataflowCount(),
+                        new DataflowAsynchronousPaths(),
                         new AccessMode(),
-                        new DataFlowSortTransformations(),
+                        new DataflowSortTransformations(),
                         new PackageProtectionLevel()
                     })
                     {

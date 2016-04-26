@@ -30,10 +30,9 @@ namespace BIDSHelper.SSIS
         public static List<TaskHost> GetControlFlowObjects<T>(DtsContainer container)
         {
             List<TaskHost> returnItems = new List<TaskHost>();
-            if (container is EventsProvider)
+            EventsProvider ep = container as EventsProvider;
+            if (ep != null)
             {
-                EventsProvider ep = (EventsProvider)container;
-
                 foreach (DtsEventHandler eh in ep.EventHandlers)
                 {
                     returnItems.AddRange(GetControlFlowObjects<T>(eh));
@@ -46,12 +45,15 @@ namespace BIDSHelper.SSIS
                 {
                     returnItems.AddRange(GetControlFlowObjects<T>((DtsContainer)exec));
                 }
-                else if (exec is TaskHost)
+                else
                 {
-                    TaskHost th = (TaskHost)exec;
-                    if (th.InnerObject is T)
+                    var th = exec as TaskHost;
+                    if (th != null)
                     {
-                        returnItems.Add(th);
+                        if (th.InnerObject is T)
+                        {
+                            returnItems.Add(th);
+                        }
                     }
                 }
             }
@@ -232,9 +234,9 @@ namespace BIDSHelper.SSIS
 
     public enum SourceAccessMode : int
     {
-        AM_OPENROWSET = 0,
-        AM_OPENROWSET_VARIABLE = 1,
-        AM_SQLCOMMAND = 2,
-        AM_SQLCOMMAND_VARIABLE = 3
+        OpenRowSet = 0,
+        OpenRowSetVariable = 1,
+        SqlCommand = 2,
+        SqlCommandVariable = 3
     }
 }

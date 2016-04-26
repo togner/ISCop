@@ -6,17 +6,22 @@ using Microsoft.SqlServer.Dts.Runtime;
 
 namespace ISCop.Rules
 {
-    public class DataFlowSortTransformations : PackageRule
+    public class DataflowSortTransformations : PackageRule
     {
-        public DataFlowSortTransformations()
+        public DataflowSortTransformations()
         {
             this.Id = "BIDS0003";
             this.Name = "DataFlowSortTransformations";
             this.Description = "Checks for the number of sorts in the data flows, and whether they could be performed in a database";
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "SortKey"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "IsSorted"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.String)"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.Int32)")]
         public override void Check(Package package)
         {
+            if (package == null)
+            {
+                return;
+            }
             List<TaskHost> pipelines = PackageHelper.GetControlFlowObjects<MainPipe>(package);
             foreach (var pipe in pipelines)
             {
@@ -46,7 +51,7 @@ namespace ISCop.Rules
                 }
                 if (sortCount > 2)
                 {
-                    var msg = string.Format(CultureInfo.CurrentCulture, "There are {0} Sort transfomations in the {1} data flow. A large number of Sorts can slow down data flow performance. Consider staging the data to a relational database and sorting it there.", sortCount, pipe.Name);
+                    var msg = string.Format(CultureInfo.CurrentCulture, "There are {0} Sort transformations in the {1} data flow. A large number of Sorts can slow down data flow performance. Consider staging the data to a relational database and sorting it there.", sortCount, pipe.Name);
                     this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, -1));
                 }
             }

@@ -6,17 +6,22 @@ using Microsoft.SqlServer.Dts.Runtime;
 
 namespace ISCop.Rules
 {
-    public class DataFlowAsynchronousPaths : PackageRule
+    public class DataflowAsynchronousPaths : PackageRule
     {
-        public DataFlowAsynchronousPaths()
+        public DataflowAsynchronousPaths()
         {
             this.Id = "BIDS0001";
             this.Name = "DataFlowAsynchronousPaths";
             this.Description = "Checks for asynchronous paths in the data flow";
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.Int32)")]
         public override void Check(Package package)
         {
+            if (package == null)
+            {
+                return;
+            }
             List<TaskHost> pipelines = PackageHelper.GetControlFlowObjects<MainPipe>(package);
             foreach (var pipe in pipelines)
             {
