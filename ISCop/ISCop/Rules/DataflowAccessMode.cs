@@ -8,9 +8,9 @@ using Microsoft.SqlServer.Dts.Runtime;
 
 namespace ISCop.Rules
 {
-    public class AccessMode : PackageRule
+    public class DataflowAccessMode : PackageRule
     {
-        public AccessMode()
+        public DataflowAccessMode()
         {
             this.Id = "BIDS0004";
             this.Name = "AccessMode";

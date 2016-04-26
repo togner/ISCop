@@ -59,11 +59,12 @@
     <Compile Include="Result.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Rules\AccessMode.cs" />
+    <Compile Include="Rules\DataflowAccessMode.cs" />
     <Compile Include="Rules\DataflowAsynchronousPaths.cs" />
     <Compile Include="Rules\DataflowCount.cs" />
     <Compile Include="Rules\DataflowSortTransformations.cs" />
     <Compile Include="Rules\PackageProtectionLevel.cs" />
+    <Compile Include="Rules\VariableEvaluateAsExpression.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
