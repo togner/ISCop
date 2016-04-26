@@ -14,19 +14,19 @@ namespace ISCop
     public class Result
     {
         public ResultType Severity { get; set; }
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string RuleId { get; set; }
+        public string RuleName { get; set; }
+        public string Message { get; set; }
         public string Package { get; set; }
         public string Source { get; set; }
         public int Line { get; set; }
 
-        public Result(ResultType severity, string id, string name, string description, string package, string source, int line)
+        public Result(ResultType severity, string id, string name, string message, string package, string source, int line)
         {
             this.Severity = severity;
-            this.Id = id;
-            this.Name = name;
-            this.Description = description;
+            this.RuleId = id;
+            this.RuleName = name;
+            this.Message = message;
             this.Package = package;
             this.Source = source;
             this.Line = line;
@@ -57,9 +57,9 @@ namespace ISCop
         public string ToString(bool includeSeverity)
         {
             var result = string.Format(CultureInfo.CurrentCulture, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
-                this.Id,
-                this.Name,
-                this.Description.Replace("\r", string.Empty).Replace("\n", string.Empty),
+                this.RuleId,
+                this.RuleName,
+                this.Message.Replace("\r", string.Empty).Replace("\n", string.Empty),
                 this.Package,
                 this.Source != this.Package ? this.Source : null,
                 this.Line != -1 ? (object)this.Line : null);

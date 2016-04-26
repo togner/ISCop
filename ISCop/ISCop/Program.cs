@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ISCop.Rules;
 using log4net;
 using Microsoft.SqlServer.Dts.Runtime;
 using Togner.Common.ConsoleApp;
@@ -77,6 +78,22 @@ namespace ISCop
                     foreach (var warning in pkg.Warnings)
                     {
                         yield return new Result(warning, pkg.Name);
+                    }
+
+                    // Custom rules
+                    foreach (var rule in new PackageRule[]
+                    {
+                        new DataFlowCount(),
+                        new DataFlowAsynchronousPaths(),
+                        new AccessMode(),
+                        new DataFlowSortTransformations()
+                    })
+                    {
+                        rule.Check(pkg);
+                        foreach (var result in rule.Results)
+                        {
+                            yield return result;
+                        }
                     }
                 }
             }
