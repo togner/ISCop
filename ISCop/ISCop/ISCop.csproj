@@ -74,7 +74,8 @@
     <Compile Include="Rules\DataflowSortTransformations.cs" />
     <Compile Include="Rules\PackageProtectionLevel.cs" />
     <Compile Include="Rules\VariableEvaluateAsExpression.cs" />
-    <Compile Include="StyleCopPackageRule.cs" />
+    <Compile Include="Rules\ScriptTaskCSharp.cs" />
+    <Compile Include="Rules\ScriptTaskStyleCop.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\StyleCop.MSBuild.4.7.49.0\tools\Settings.StyleCop">

@@ -78,7 +78,6 @@ namespace ISCop
                 foreach (var pkgItem in proj.PackageItems)
                 {
                     var pkg = pkgItem.Package;
-                    Program.Logger.InfoFormat("Analyzing {0}...", pkg.Name);
 
                     // Validation errors and warnings
                     // E.g. references to non-existing package connection managers.
@@ -100,7 +99,8 @@ namespace ISCop
                         new DataflowAccessMode(),
                         new DataflowSortTransformations(),
                         new PackageProtectionLevel(),
-                        new StyleCopPackageRule(styleCopSettingsPath)
+                        new ScriptTaskCSharp(),
+                        new ScriptTaskStyleCop(styleCopSettingsPath)
                     })
                     {
                         rule.Check(pkg);

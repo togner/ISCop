@@ -22,8 +22,7 @@ namespace ISCop.Rules
             {
                 return;
             }
-            List<TaskHost> pipelines = PackageHelper.GetControlFlowObjects<MainPipe>(package);
-            foreach (var pipe in pipelines)
+            foreach (var pipe in PackageHelper.GetControlFlowObjects<MainPipe>(package))
             {
                 var mainPipe = (MainPipe)pipe.InnerObject;
                 int sortCount = 0;

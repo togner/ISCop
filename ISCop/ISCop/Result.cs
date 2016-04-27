@@ -62,10 +62,10 @@ namespace ISCop
         public string ToString(bool includeSeverity)
         {
             var result = string.Format(CultureInfo.CurrentCulture, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
+                this.Package,
                 this.RuleId,
                 this.RuleName,
                 this.Message.Replace("\r", string.Empty).Replace("\n", string.Empty),
-                this.Package,
                 this.Source != this.Package ? this.Source : null,
                 this.Line != -1 ? (object)this.Line : null);
             if (includeSeverity)

@@ -16,16 +16,15 @@ namespace ISCop
     /// Runs StyleCop on C# script tasks.
     /// Path to settings file can be passed as param but parser and rule DLLs must be in root folder.
     /// </summary>
-    public class StyleCopPackageRule : PackageRule
+    public class ScriptTaskStyleCop : ScriptTaskCSharp
     {
-        private const string ScriptLanguage = "CSharp";
         private const string ScriptFileName = "ScriptMain.cs";
         private const VSTAScriptProjectStorage.Encoding ScriptEncoding = VSTAScriptProjectStorage.Encoding.UTF8;
         protected StyleCopConsole StyleCop { get; private set; } 
         private List<Tuple<Violation, string>> Violations { get; set; }
         private List<string> Output { get; set; }
 
-        public StyleCopPackageRule(string styleCopSettingsPath)
+        public ScriptTaskStyleCop(string styleCopSettingsPath)
         {
             if (!File.Exists(styleCopSettingsPath))
             {
@@ -50,25 +49,23 @@ namespace ISCop
                 this.Violations.Clear();
                 this.Output.Clear();
                 var st = (ScriptTask)scriptTask.InnerObject;
-                if (st.ScriptLanguage != VSTAScriptLanguages.GetDisplayName(StyleCopPackageRule.ScriptLanguage))
+                if (st.ScriptLanguage != VSTAScriptLanguages.GetDisplayName(ScriptTaskStyleCop.ScriptLanguage))
                 {
                     continue;
                 }
                 string tempFile = null;
-                string csFile = null;
                 try
                 {
-                    tempFile = Path.GetTempFileName();
-                    csFile = Path.ChangeExtension(tempFile, "cs");
+                    tempFile = Path.GetTempPath() + Guid.NewGuid().ToString() + ".cs";
 
-                    var vstaFile = (VSTAScriptProjectStorage.VSTAScriptFile)(st.ScriptStorage.ScriptFiles[StyleCopPackageRule.ScriptFileName]);
+                    var vstaFile = (VSTAScriptProjectStorage.VSTAScriptFile)(st.ScriptStorage.ScriptFiles[ScriptTaskStyleCop.ScriptFileName]);
                     ////if (vstaFile.Encoding == StyleCopPackageRule.ScriptEncoding) 
-                    File.WriteAllText(csFile, vstaFile.Data, Encoding.UTF8);
+                    File.WriteAllText(tempFile, vstaFile.Data, Encoding.UTF8);
 
                     var sconfiguration = new StyleCop.Configuration(new string[0]);
                     var sproject = new CodeProject(Guid.NewGuid().GetHashCode(), "Stylecop.Settings", sconfiguration);
 
-                    this.StyleCop.Core.Environment.AddSourceCode(sproject, csFile, null);
+                    this.StyleCop.Core.Environment.AddSourceCode(sproject, tempFile, null);
                     this.StyleCop.Start(new List<CodeProject> { sproject }, true);
                 }
                 finally
@@ -76,10 +73,6 @@ namespace ISCop
                     if (File.Exists(tempFile))
                     {
                         File.Delete(tempFile);
-                    }
-                    if (File.Exists(csFile))
-                    {
-                        File.Delete(csFile);
                     }
                 }
 
