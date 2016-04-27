@@ -17,6 +17,7 @@ namespace ISCop
             this.Description = "Every script task must be written in C#.";
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.Int32)")]
         public override void Check(Package package)
         {
             if (package == null)
