@@ -15,7 +15,10 @@ namespace ISCop
 {
     /// <summary>
     /// TODO: 
-    /// Perf - instead of visiting by package, visit by component. Filter components by rule type.
+    /// Fix literals (make const, quote args), make source more uniform (path to component?)
+    /// Design/Perf
+    ///     Visit each component once 
+    ///     Run all the rules based on component type
     /// Place rules in separate assembly, reflection + attribs + config file
     /// </summary>
     public static class Program
@@ -36,7 +39,7 @@ namespace ISCop
                     Program.PrintHelp(string.Empty);
                     return 1;
                 }
-                var ispacPath = arguments["i"];
+                var ispacPath = arguments["ispac"];
                 if (string.IsNullOrEmpty(ispacPath)
                     || ispacPath.Equals(Arguments.NoValue)
                     || !File.Exists(ispacPath))
@@ -46,18 +49,24 @@ namespace ISCop
                 }
                 else
                 {
-                    var styleCopSettingsPath = arguments["s"];
+                    var styleCopSettingsPath = arguments["scop"];
                     if (string.IsNullOrEmpty(styleCopSettingsPath)
                         || styleCopSettingsPath.Equals(Arguments.NoValue)
                         || !File.Exists(styleCopSettingsPath))
                     {
                         styleCopSettingsPath = Path.GetFullPath("Settings.StyleCop");
                     }
+                    var packageName = arguments["pkg"];
+                    if (!string.IsNullOrEmpty(packageName) 
+                        && packageName.Equals(Arguments.NoValue))
+                    {
+                        packageName = null;
+                    }
 
                     // A: Open project as ispac (needs to be built)
                     // B: Create new project, load proj param, cm from xml files - https://social.msdn.microsoft.com/Forums/sqlserver/en-US/ff62aafa-3b19-46e3-839e-8353bf4ab6df/problem-loading-ssis-project-parameters-out-of-projectparams-file?forum=sqlintegrationservices
                     // Load dtsx - does it get the project configs (cm, parameters) automagically?
-                    foreach (var result in Program.Analyze(ispacPath, styleCopSettingsPath))
+                    foreach (var result in Program.Analyze(ispacPath, styleCopSettingsPath, packageName))
                     {
                         result.Log(Program.Logger);
                     }
@@ -71,12 +80,17 @@ namespace ISCop
             return exitCode;
         }
 
-        private static IEnumerable<Result> Analyze(string ispacPath, string styleCopSettingsPath)
+        private static IEnumerable<Result> Analyze(string ispacPath, string styleCopSettingsPath, string packageName)
         {
             using (var proj = Project.OpenProject(ispacPath))
             {
                 foreach (var pkgItem in proj.PackageItems)
                 {
+                    if (!string.IsNullOrEmpty(packageName) 
+                        && !pkgItem.StreamName.Equals(packageName + ".dtsx", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        continue;
+                    }
                     var pkg = pkgItem.Package;
 
                     // Validation errors and warnings
@@ -99,6 +113,8 @@ namespace ISCop
                         new DataflowAccessMode(),
                         new DataflowSortTransformations(),
                         new PackageProtectionLevel(),
+                        new VariableEvaluateAsExpression(),
+                        new TaskProperties(),
                         new ScriptTaskCSharp(),
                         new ScriptTaskStyleCop(styleCopSettingsPath)
                     })
@@ -121,7 +137,7 @@ namespace ISCop
             }
             Program.Logger.Info(
 @"Usage:
-    ISCop.exe -i:<path to .ispac file> [-s:<path to Settings.StyleCop>]
+    ISCop.exe -ispac:<path to .ispac file> [-scop:<path to Settings.StyleCop>] [-pkg:<package name>] 
 ");
         }
     }
