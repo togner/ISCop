@@ -8,10 +8,16 @@ using System.Threading.Tasks;
 using ISCop.Rules;
 using log4net;
 using Microsoft.SqlServer.Dts.Runtime;
+using StyleCop;
 using Togner.Common.ConsoleApp;
 
 namespace ISCop
 {
+    /// <summary>
+    /// TODO: 
+    /// Perf - instead of visiting by package, visit by component. Filter components by rule type.
+    /// Place rules in separate assembly, reflection + attribs + config file
+    /// </summary>
     public static class Program
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Program));
@@ -30,9 +36,7 @@ namespace ISCop
                     Program.PrintHelp(string.Empty);
                     return 1;
                 }
-
                 var ispacPath = arguments["i"];
-
                 if (string.IsNullOrEmpty(ispacPath)
                     || ispacPath.Equals(Arguments.NoValue)
                     || !File.Exists(ispacPath))
@@ -42,13 +46,21 @@ namespace ISCop
                 }
                 else
                 {
-                   // A: Open project as ispac (needs to be built)
-                   // B: Create new project, load proj param, cm from xml files - https://social.msdn.microsoft.com/Forums/sqlserver/en-US/ff62aafa-3b19-46e3-839e-8353bf4ab6df/problem-loading-ssis-project-parameters-out-of-projectparams-file?forum=sqlintegrationservices
-                   // Load dtsx - does it get the project configs (cm, parameters) automagically?
-                   foreach (var result in Program.Analyze(ispacPath))
-                   {
-                       result.Log(Program.Logger);
-                   }
+                    var styleCopSettingsPath = arguments["s"];
+                    if (string.IsNullOrEmpty(styleCopSettingsPath)
+                        || styleCopSettingsPath.Equals(Arguments.NoValue)
+                        || !File.Exists(styleCopSettingsPath))
+                    {
+                        styleCopSettingsPath = Path.GetFullPath("Settings.StyleCop");
+                    }
+
+                    // A: Open project as ispac (needs to be built)
+                    // B: Create new project, load proj param, cm from xml files - https://social.msdn.microsoft.com/Forums/sqlserver/en-US/ff62aafa-3b19-46e3-839e-8353bf4ab6df/problem-loading-ssis-project-parameters-out-of-projectparams-file?forum=sqlintegrationservices
+                    // Load dtsx - does it get the project configs (cm, parameters) automagically?
+                    foreach (var result in Program.Analyze(ispacPath, styleCopSettingsPath))
+                    {
+                        result.Log(Program.Logger);
+                    }
                 }
             }
             catch (Exception exception)
@@ -59,7 +71,7 @@ namespace ISCop
             return exitCode;
         }
 
-        private static IEnumerable<Result> Analyze(string ispacPath)
+        private static IEnumerable<Result> Analyze(string ispacPath, string styleCopSettingsPath)
         {
             using (var proj = Project.OpenProject(ispacPath))
             {
@@ -87,7 +99,8 @@ namespace ISCop
                         new DataflowAsynchronousPaths(),
                         new DataflowAccessMode(),
                         new DataflowSortTransformations(),
-                        new PackageProtectionLevel()
+                        new PackageProtectionLevel(),
+                        new StyleCopPackageRule(styleCopSettingsPath)
                     })
                     {
                         rule.Check(pkg);
@@ -108,7 +121,7 @@ namespace ISCop
             }
             Program.Logger.Info(
 @"Usage:
-    ISCop.exe -i:<path to .ispac file>
+    ISCop.exe -i:<path to .ispac file> [-s:<path to Settings.StyleCop>]
 ");
         }
     }
