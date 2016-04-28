@@ -30,7 +30,7 @@ namespace ISCop.StyleCopRules
         private bool VisitMainMethod(CsElement element, CsElement parentElement, object context)
         {
             if (element.ElementType == ElementType.Method 
-                && element.Name.Equals("method Main", StringComparison.InvariantCultureIgnoreCase))
+                && element.Name.Equals("method Main", StringComparison.OrdinalIgnoreCase))
             {
                 // find first (top-most) try token
                 var tryToken = element.ElementTokens.FirstOrDefault(t => t.CsTokenType == CsTokenType.Try);
