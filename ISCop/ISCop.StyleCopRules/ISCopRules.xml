@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SourceAnalyzer Name="ISCop Rules">
+  <Description>StyleCop Rules for ISCop</Description>
+  <Rules>
+    <RuleGroup Name="ISCop Rules">
+      <Rule Name="ScriptMainShouldHandleErrors" CheckId="IS0001">
+        <Context>Main method doesn't contain try/catch block or its error handling is not standard.{0}</Context>
+        <Description>Try/catch block is expected, catch block should contain FireError invocation and TaskResult=Failure assignment.</Description>
+      </Rule>
+    </RuleGroup>
+  </Rules>
+</SourceAnalyzer>
