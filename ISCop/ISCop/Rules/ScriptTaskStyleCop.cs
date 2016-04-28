@@ -46,8 +46,6 @@ namespace ISCop
             }
             foreach (var scriptTask in PackageHelper.GetControlFlowObjects<ScriptTask>(package))
             {
-                this.Violations.Clear();
-                this.Output.Clear();
                 var st = (ScriptTask)scriptTask.InnerObject;
                 if (st.ScriptLanguage != VSTAScriptLanguages.GetDisplayName(ScriptTaskStyleCop.ScriptLanguage))
                 {
@@ -56,17 +54,29 @@ namespace ISCop
                 string tempFile = null;
                 try
                 {
-                    tempFile = Path.GetTempPath() + Guid.NewGuid().ToString() + ".cs";
+                    this.Violations.Clear();
+                    this.Output.Clear();
 
+                    tempFile = Path.GetTempPath() + Guid.NewGuid().ToString() + ".cs";
                     var vstaFile = (VSTAScriptProjectStorage.VSTAScriptFile)(st.ScriptStorage.ScriptFiles[ScriptTaskStyleCop.ScriptFileName]);
                     ////if (vstaFile.Encoding == StyleCopPackageRule.ScriptEncoding) 
                     File.WriteAllText(tempFile, vstaFile.Data, Encoding.UTF8);
-
-                    var sconfiguration = new StyleCop.Configuration(new string[0]);
-                    var sproject = new CodeProject(Guid.NewGuid().GetHashCode(), "Stylecop.Settings", sconfiguration);
-
-                    this.StyleCop.Core.Environment.AddSourceCode(sproject, tempFile, null);
+                    var sproject = this.CreateSingleFileProject(tempFile);
                     this.StyleCop.Start(new List<CodeProject> { sproject }, true);
+
+                    foreach (var violation in this.Violations)
+                    {
+                        var elementViolation = violation.Item1.Element.Violations.FirstOrDefault(v => v.Key == violation.Item1.Key);
+                        var message = elementViolation != null ? elementViolation.Message : violation.Item1.Rule.Context;
+                        var result = new Result(ResultType.Warning,
+                            violation.Item1.Rule.CheckId,
+                            violation.Item1.Rule.Name,
+                            message + " To suppress: " + violation.Item2,
+                            package.Name,
+                            string.Format(CultureInfo.CurrentCulture, "{0} ({1})", st.ScriptProjectName, scriptTask.Name),
+                            violation.Item1.Line);
+                        this.Results.Add(result);
+                    }
                 }
                 finally
                 {
@@ -75,21 +85,14 @@ namespace ISCop
                         File.Delete(tempFile);
                     }
                 }
-
-                foreach (var violation in this.Violations)
-                {
-                    var elementViolation = violation.Item1.Element.Violations.FirstOrDefault(v => v.Key == violation.Item1.Key);
-                    var message = elementViolation != null ? elementViolation.Message : violation.Item1.Rule.Context;
-                    var result = new Result(ResultType.Warning,
-                        violation.Item1.Rule.CheckId,
-                        violation.Item1.Rule.Name,
-                        message + " To suppress: " + violation.Item2,
-                        package.Name,
-                        string.Format(CultureInfo.CurrentCulture, "{0} ({1})", st.ScriptProjectName, scriptTask.Name),
-                        violation.Item1.Line);
-                    this.Results.Add(result);
-                }
             }
+        }
+
+        private CodeProject CreateSingleFileProject(string filePath)
+        {
+            var sproject = new CodeProject(Guid.NewGuid().GetHashCode(), "Stylecop.Settings", new StyleCop.Configuration(new string[0]));
+            this.StyleCop.Core.Environment.AddSourceCode(sproject, filePath, null);
+            return sproject;
         }
     }
 }
