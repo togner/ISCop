@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using BIDSHelper.SSIS;
 using Microsoft.SqlServer.Dts.Runtime;
 
 namespace ISCop.Rules
@@ -20,7 +19,7 @@ namespace ISCop.Rules
             {
                 return;
             }
-            foreach (var task in PackageHelper.GetControlFlowObjects<object>(package))
+            foreach (var task in package.GetControlFlowObjects<object>())
             {
                 var mainTask = task as DtsContainer;
                 if (mainTask != null)

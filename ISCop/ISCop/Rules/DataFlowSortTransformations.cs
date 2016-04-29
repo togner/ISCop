@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using BIDSHelper.SSIS;
 using Microsoft.SqlServer.Dts.Pipeline.Wrapper;
 using Microsoft.SqlServer.Dts.Runtime;
 
@@ -22,25 +21,25 @@ namespace ISCop.Rules
             {
                 return;
             }
-            foreach (var pipe in PackageHelper.GetControlFlowObjects<MainPipe>(package))
+            foreach (var pipe in package.GetControlFlowObjects<MainPipe>())
             {
                 var mainPipe = (MainPipe)pipe.InnerObject;
                 int sortCount = 0;
                 foreach (IDTSComponentMetaData100 comp in mainPipe.ComponentMetaDataCollection)
                 {
-                    var compInfo = PackageHelper.GetComponentInfo(comp);
-                    if (compInfo != null && compInfo.CreationName == PackageRule.SortComponentName)
+                    var compInfo = ComponentInfo.Create(comp);
+                    if (compInfo != null && compInfo.CreationName == ComponentInfo.SortTransformName)
                     {
                         sortCount++;
 
                         //Trace the input
-                        IDTSComponentMetaData100 sourceComp = PackageHelper.TraceInputToSource(mainPipe, comp);
+                        var sourceComp = comp.TraceInputToSource(mainPipe);
                         if (sourceComp != null)
                         {
-                            var sourceCompInfo = PackageHelper.GetComponentInfo(sourceComp);
-                            if (sourceCompInfo != null 
-                                && (sourceCompInfo.Name == PackageRule.OleDbSourceComponentName
-                                    || sourceCompInfo.Name == PackageRule.AdoNetSourceComponentName))
+                            var sourceCompInfo = ComponentInfo.Create(sourceComp);
+                            if (sourceCompInfo != null
+                                && (sourceCompInfo.Name == ComponentInfo.OleDbSourceName
+                                    || sourceCompInfo.Name == ComponentInfo.AdoNetSourceName))
                             {
                                 var msg = string.Format(CultureInfo.CurrentCulture, "The {0} Sort transformation is operating on data provided from the {1} source. Rather than using the Sort transformation, which is fully blocking, the sorting should be performed using a WHERE clause in the source's SQL, and the IsSorted and SortKey properties should be set appropriately. Reference: http://msdn.microsoft.com/en-us/library/ms137653(SQL.90).aspx", comp.Name, sourceComp.Name);
                                 this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, comp.Name));

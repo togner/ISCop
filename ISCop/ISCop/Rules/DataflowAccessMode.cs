@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using BIDSHelper.SSIS;
-using log4net;
+﻿using System.Globalization;
 using Microsoft.SqlServer.Dts.Pipeline.Wrapper;
 using Microsoft.SqlServer.Dts.Runtime;
 
 namespace ISCop.Rules
 {
+    public enum SourceAccessMode : int
+    {
+        OpenRowSet = 0,
+        OpenRowSetVariable = 1,
+        SqlCommand = 2,
+        SqlCommandVariable = 3
+    }
+
     public class DataflowAccessMode : PackageRule
     {
         public DataflowAccessMode()
@@ -24,31 +28,22 @@ namespace ISCop.Rules
             {
                 return;
             }
-            foreach (var pipe in PackageHelper.GetControlFlowObjects<MainPipe>(package))
+            foreach (var pipe in package.GetControlFlowObjects<MainPipe>())
             {
                 var mainPipe = (MainPipe)pipe.InnerObject;
                 foreach (IDTSComponentMetaData100 comp in mainPipe.ComponentMetaDataCollection)
                 {
-                    var compInfo = PackageHelper.GetComponentInfo(comp);
-                    if (compInfo != null 
-                        && (compInfo.Name == PackageRule.OleDbSourceComponentName 
-                            || compInfo.Name == PackageRule.AdoNetSourceComponentName 
-                            || compInfo.Name == PackageRule.LookupComponentName))
+                    var compInfo = ComponentInfo.Create(comp);
+                    if (compInfo != null
+                        && (compInfo.Name == ComponentInfo.OleDbSourceName
+                            || compInfo.Name == ComponentInfo.AdoNetSourceName
+                            || compInfo.Name == ComponentInfo.LookupName))
                     {
-                        IDTSCustomProperty100 prop = null;
-                        try
+                        SourceAccessMode? accesModeProp = null;
+                        if (comp.TryGetCustomPropertyValue<SourceAccessMode?>(CustomPropertyNames.AccessMode, out accesModeProp))
                         {
-                            // Not all Lookup comps have this property
-                            prop = comp.CustomPropertyCollection["AccessMode"]; 
-                        }
-                        catch 
-                        {
-                        }
-                        if (prop != null && prop.Value is int)
-                        {
-                            var accesModeProp = (SourceAccessMode)prop.Value;
-                            if (accesModeProp == SourceAccessMode.OpenRowSet
-                                || accesModeProp == SourceAccessMode.OpenRowSetVariable)
+                            if (accesModeProp.Value == SourceAccessMode.OpenRowSet
+                                || accesModeProp.Value == SourceAccessMode.OpenRowSetVariable)
                             {
                                 var msg = string.Format(CultureInfo.CurrentCulture, "Change the {0} component to use a SQL Command access mode, as this performs better than the OpenRowset access mode.", comp.Name);
                                 this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, comp.Name));

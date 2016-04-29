@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using BIDSHelper.SSIS;
 using Microsoft.SqlServer.Dts.Pipeline.Wrapper;
 using Microsoft.SqlServer.Dts.Runtime;
 
@@ -21,7 +20,7 @@ namespace ISCop.Rules
             {
                 return;
             }
-            List<TaskHost> pipelines = PackageHelper.GetControlFlowObjects<MainPipe>(package);
+            List<TaskHost> pipelines = package.GetControlFlowObjects<MainPipe>();
             if (pipelines.Count > 1)
             {
                 var msg = "There are " + pipelines.Count + " data flows in the package. For simplicity, encapsulation, and to facilitate team development, consider using only one data flow per package.";

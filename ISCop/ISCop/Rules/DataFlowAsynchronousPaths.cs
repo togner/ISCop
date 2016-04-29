@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using BIDSHelper.SSIS;
+﻿using System.Globalization;
 using Microsoft.SqlServer.Dts.Pipeline.Wrapper;
 using Microsoft.SqlServer.Dts.Runtime;
 
@@ -22,7 +20,7 @@ namespace ISCop.Rules
             {
                 return;
             }
-            foreach (var pipe in PackageHelper.GetControlFlowObjects<MainPipe>(package))
+            foreach (var pipe in package.GetControlFlowObjects<MainPipe>())
             {
                 var mainPipe = (MainPipe)pipe.InnerObject;
                 int asyncCount = 0;
@@ -32,7 +30,7 @@ namespace ISCop.Rules
                     {
                         continue;
                     }
-                    var compInfo = PackageHelper.GetComponentInfo(path.StartPoint.Component);
+                    var compInfo = ComponentInfo.Create(path.StartPoint.Component);
                     if (compInfo != null && compInfo.ComponentType != DTSPipelineComponentType.SourceAdapter)
                     {
                         asyncCount++;
