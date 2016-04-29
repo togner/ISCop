@@ -6,11 +6,11 @@ namespace ISCop.StyleCopRules.Tests
     public class ISCopRulesTest : StyleCopRulesTest
     {
         [TestMethod]
-        public void LocalPrefixedWithUnderscoreValidTest()
+        public void MainShouldHandleErrorsValidTest()
         {
             this.AddSourceCode("TestFiles\\Valid.cs");
             this.StartAnalysis();
-            this.AssertNotViolated(ISCopRules.ScriptMainShouldHandleErrorsRuleName);
+            this.AssertNotViolated(ISCopRules.MainShouldHandleErrorsRuleName);
         }
     }
 }

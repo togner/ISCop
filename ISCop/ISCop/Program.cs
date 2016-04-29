@@ -84,7 +84,7 @@ namespace ISCop
         {
             using (var proj = Project.OpenProject(ispacPath))
             {
-                foreach (var pkgItem in proj.PackageItems)
+                foreach (var pkgItem in proj.PackageItems.OrderBy(p => p.StreamName))
                 {
                     if (!string.IsNullOrEmpty(packageName) 
                         && !pkgItem.StreamName.Equals(packageName + ".dtsx", StringComparison.InvariantCultureIgnoreCase))
@@ -108,6 +108,8 @@ namespace ISCop
                     // Custom rules
                     foreach (var rule in new PackageRule[]
                     {
+                        new DataflowScriptStyleCop(styleCopSettingsPath),
+                        new DataflowScriptCSharp(),
                         new DataflowCount(),
                         new DataflowAsynchronousPaths(),
                         new DataflowAccessMode(),

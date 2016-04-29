@@ -1,11 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<SourceAnalyzer Name="ISCop Rules">
+<SourceAnalyzer Name="ISCopRules">
   <Description>StyleCop Rules for ISCop</Description>
   <Rules>
-    <RuleGroup Name="ISCop Rules">
-      <Rule Name="ScriptMainShouldHandleErrors" CheckId="IS0001">
-        <Context>Main method doesn't contain try/catch block or its error handling is not standard.{0}</Context>
-        <Description>Try/catch block is expected, catch block should contain FireError invocation and TaskResult=Failure assignment.</Description>
+    <RuleGroup Name="ScriptTaskRules">
+      <Rule Name="MainShouldHandleErrors" CheckId="IS0001">
+        <Context>Main method {0} doesn't contain try/catch block or its error handling is not standard.{1}</Context>
+        <Description>Try/catch block is expected, catch block should contain Dts.Events.FireError invocation and TaskResult=Failure assignment.</Description>
+      </Rule>
+    </RuleGroup>
+    <RuleGroup Name="ScriptComponentRules">
+      <Rule Name="PublicMethodsShouldHandleErrors" CheckId="IS0002">
+        <Context>Public method {0} doesn't contain try/catch block or its error handling is not standard.{1}</Context>
+        <Description>Try/catch block is expected, catch block should contain ComponentMetaData.FireWarning invocation Row.Status="FAILED" assignment.</Description>
       </Rule>
     </RuleGroup>
   </Rules>

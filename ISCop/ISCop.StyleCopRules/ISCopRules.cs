@@ -11,11 +11,18 @@ namespace ISCop.StyleCopRules
     [SourceAnalyzer(typeof(CsParser))]
     public class ISCopRules : SourceAnalyzer
     {
-        public const string ScriptMainShouldHandleErrorsRuleName = "ScriptMainShouldHandleErrors";
-        private static readonly Dictionary<string, string> ExpectedCatchExpressions = new Dictionary<string, string>
+        // TODO: Separate classes
+        public const string MainShouldHandleErrorsRuleName = "MainShouldHandleErrors";
+        public const string PublicMethodsShouldHandleErrorsRuleName = "PublicMethodsShouldHandleErrors";
+        private static readonly Dictionary<string, string> MainExpectedCatchExpressions = new Dictionary<string, string>
         {
             { @"Dts\.Events\.FireError\(0,.+,.+\.Message.+\.StackTrace,[\s]+string.Empty,[\s]+0\)", "Dts.Events.FireError(0, <package name>, <exception message + stacktrace>, string.Empty, 0)" },
             { @"Dts\.TaskResult = \(int\)ScriptResults\.Failure", "Dts.TaskResult = (int)ScriptResults.Failure"}
+        };
+        private static readonly Dictionary<string, string> PublicMethodsExpectedCatchExpressions = new Dictionary<string, string>
+        {
+            { @"ComponentMetaData\.FireWarning\(0, ComponentMetaData\.Name\.Trim\(\),.+\.Message.+\.StackTrace.+string.Empty,[\s]+0\)", "ComponentMetaData.FireWarning(0, ComponentMetaData.Name.Trim(), <exception message + stacktrace>, string.Empty, 0)" },
+            { "Row\\.Status = \"FAILED\"", "Row.Status = \"FAILED\""}
         };
 
         public override void AnalyzeDocument(CodeDocument document)
@@ -23,39 +30,55 @@ namespace ISCop.StyleCopRules
             var csharpDocument = (CsDocument)document;
             if (csharpDocument.RootElement != null && !csharpDocument.RootElement.Generated)
             {
-                csharpDocument.WalkDocument(this.VisitMainMethod);
+                csharpDocument.WalkDocument(this.VisitMethod);
             }
         }
 
-        private bool VisitMainMethod(CsElement element, CsElement parentElement, object context)
+        private bool VisitMethod(CsElement element, CsElement parentElement, object context)
         {
-            if (element.ElementType == ElementType.Method 
-                && element.Name.Equals("method Main", StringComparison.OrdinalIgnoreCase))
+            if (element.ElementType == ElementType.Method)
             {
-                // find first (top-most) try token
-                var tryToken = element.ElementTokens.FirstOrDefault(t => t.CsTokenType == CsTokenType.Try);
-                if (tryToken == null)
+                if (element.Name.Equals("method Main", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.AddViolation(element, element.LineNumber, ISCopRules.ScriptMainShouldHandleErrorsRuleName, string.Empty);
+                    this.ValidateTryCatch(element, ISCopRules.MainShouldHandleErrorsRuleName, ISCopRules.MainExpectedCatchExpressions);
                 }
-                else
+                else if (element.AccessModifier == AccessModifierType.Public)
                 {
-                    // check that catch statement contains expected expressions
-                    var expectedCatchChildExpressions = new List<string>(ISCopRules.ExpectedCatchExpressions.Keys);
-                    foreach (var catchStatement in ((TryStatement)tryToken.Parent).CatchStatements)
-                    {
-                        catchStatement.WalkStatement(this.VisitCatchChildStatements, expectedCatchChildExpressions);
-                    }
-                    if (expectedCatchChildExpressions.Count > 0)
-                    {
-                        this.AddViolation(element, 
-                            element.LineNumber, 
-                            ISCopRules.ScriptMainShouldHandleErrorsRuleName, 
-                            string.Format(CultureInfo.CurrentCulture, " Catch block should contain \"{0}\"", ISCopRules.ExpectedCatchExpressions[expectedCatchChildExpressions[0]]));
-                    }
+                    this.ValidateTryCatch(element, ISCopRules.PublicMethodsShouldHandleErrorsRuleName, ISCopRules.PublicMethodsExpectedCatchExpressions);
                 }
             }
             return true;
+        }
+
+        private void ValidateTryCatch(CsElement element, string ruleName, Dictionary<string, string> expectedCatchExpressions)
+        {
+            // find first (top-most) try token
+            var tryToken = element.ElementTokens.FirstOrDefault(t => t.CsTokenType == CsTokenType.Try);
+            if (tryToken == null)
+            {
+                this.AddViolation(element, 
+                    element.LineNumber,
+                    ruleName,
+                    element.FullNamespaceName, 
+                    string.Empty);
+            }
+            else
+            {
+                // check that catch statement contains expected expressions
+                var expectedCatchChildExpressions = new List<string>(expectedCatchExpressions.Keys);
+                foreach (var catchStatement in ((TryStatement)tryToken.Parent).CatchStatements)
+                {
+                    catchStatement.WalkStatement(this.VisitCatchChildStatements, expectedCatchChildExpressions);
+                }
+                if (expectedCatchChildExpressions.Count > 0)
+                {
+                    this.AddViolation(element,
+                        element.LineNumber,
+                        ruleName,
+                        element.FullNamespaceName, 
+                        string.Format(CultureInfo.CurrentCulture, " Catch block should contain \"{0}\"", expectedCatchExpressions[expectedCatchChildExpressions[0]]));
+                }
+            }
         }
 
         private bool VisitCatchChildStatements(Statement statement, Expression parentExpression, Statement parentStatement, CsElement parentElement, List<string> context)
