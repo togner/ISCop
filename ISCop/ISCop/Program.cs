@@ -15,7 +15,7 @@ namespace ISCop
 {
     /// <summary>
     /// TODO: 
-    /// Fix literals (make const, quote args), make source more uniform (path to component?)
+    /// Fix literals (make const, quote args), make source more uniform (path to component?), move Result creating code to base class
     /// Design/Perf
     ///     Visit each component once 
     ///     Run all the rules based on component type

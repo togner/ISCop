@@ -8,7 +8,7 @@ namespace ISCop.Rules
     {
         public DataflowScriptCSharp()
         {
-            this.Id = "SSIS0001";
+            this.Id = "IS0101";
             this.Name = "DataflowScriptCSharp";
             this.Description = "Every data flow script component must be written in C#.";
         }
@@ -30,7 +30,7 @@ namespace ISCop.Rules
                         var language = comp.GetCustomPropertyValue<string>(CustomPropertyNames.ScriptLanguage);
                         if (language != ScriptTaskCSharp.CSharp)
                         {
-                            var msg = string.Format(CultureInfo.CurrentCulture, "Script component {0} is written in {1}.", comp.Name, language);
+                            var msg = string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, comp.Name, language, this.Description);
                             this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, comp.Name));
                         }
                     }

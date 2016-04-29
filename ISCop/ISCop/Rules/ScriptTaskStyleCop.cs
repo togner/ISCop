@@ -17,6 +17,7 @@ namespace ISCop.Rules
     /// </summary>
     public class ScriptTaskStyleCop : ScriptTaskCSharp
     {
+        protected const string ResultSourceFormat = "{0} ({1})";
         protected string ScriptFileName { get; set; } 
         protected StyleCopConsole StyleCop { get; private set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
@@ -26,6 +27,7 @@ namespace ISCop.Rules
 
         public ScriptTaskStyleCop(string styleCopSettingsPath)
         {
+            this.ResultMessageFormat = "{0} To suppress: {1}";
             this.ScriptFileName = "ScriptMain.cs";
             if (!File.Exists(styleCopSettingsPath))
             {
@@ -60,9 +62,9 @@ namespace ISCop.Rules
                     var result = new Result(ResultType.Warning,
                         violation.Item1.Rule.CheckId,
                         violation.Item1.Rule.Name,
-                        message + " To suppress: " + violation.Item2,
+                        string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, message, violation.Item2),
                         package.Name,
-                        string.Format(CultureInfo.CurrentCulture, "{0} ({1})", st.ScriptProjectName, scriptTask.Name),
+                        string.Format(CultureInfo.CurrentCulture, ScriptTaskStyleCop.ResultSourceFormat, st.ScriptProjectName, scriptTask.Name),
                         violation.Item1.Line);
                     this.Results.Add(result);
                 }

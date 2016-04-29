@@ -3,13 +3,13 @@
   <Description>StyleCop Rules for ISCop</Description>
   <Rules>
     <RuleGroup Name="ScriptTaskRules">
-      <Rule Name="MainShouldHandleErrors" CheckId="IS0001">
+      <Rule Name="MainShouldHandleErrors" CheckId="IS0002">
         <Context>Main method {0} doesn't contain try/catch block or its error handling is not standard.{1}</Context>
         <Description>Try/catch block is expected, catch block should contain Dts.Events.FireError invocation and TaskResult=Failure assignment.</Description>
       </Rule>
     </RuleGroup>
     <RuleGroup Name="ScriptComponentRules">
-      <Rule Name="PublicMethodsShouldHandleErrors" CheckId="IS0002">
+      <Rule Name="PublicMethodsShouldHandleErrors" CheckId="IS0102">
         <Context>Public method {0} doesn't contain try/catch block or its error handling is not standard.{1}</Context>
         <Description>Try/catch block is expected, catch block should contain ComponentMetaData.FireWarning invocation Row.Status="FAILED" assignment.</Description>
       </Rule>

@@ -6,14 +6,15 @@ namespace ISCop.Rules
 {
     public class DataflowAsynchronousPaths : PackageRule
     {
+        
         public DataflowAsynchronousPaths()
         {
-            this.Id = "BIDS0001";
-            this.Name = "DataFlowAsynchronousPaths";
-            this.Description = "Checks for asynchronous paths in the data flow";
+            this.Id = "IS104";
+            this.Name = "DataflowAsynchronousPaths";
+            this.Description = "Too many asynchronous outputs can adversely impact performance.";
+            this.ResultMessageFormat = "There are {0} asynchronous outputs in the {1} data flow. {2}";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.Int32)")]
         public override void Check(Package package)
         {
             if (package == null)
@@ -38,7 +39,7 @@ namespace ISCop.Rules
                 }
                 if (asyncCount > 0)
                 {
-                    var msg = string.Format(CultureInfo.CurrentCulture, "There are {0} asynchronous outputs in the {1} data flow. Too many asynchronous outputs can adversely impact performance.", asyncCount, pipe.Name);
+                    var msg = string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, asyncCount, pipe.Name, this.Description);
                     this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, -1));
                 }
             }

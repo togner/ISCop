@@ -16,12 +16,12 @@ namespace ISCop.Rules
     {
         public DataflowAccessMode()
         {
-            this.Id = "BIDS0004";
-            this.Name = "AccessMode";
-            this.Description = "Validates that sources and Lookup transformations are not set to use the 'Table or View' access mode, as it can be slower than specifying a SQL Statement";
+            this.Id = "IS0103";
+            this.Name = "DataflowAccessMode";
+            this.Description = "Sources and Lookup transformations should not be set to use the 'Table or View' access mode, as it can be slower than specifying a SQL Statement.";
+            this.ResultMessageFormat = "Component {0} uses OpenRowset access mode. {1}";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.String)"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "OpenRowset"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override void Check(Package package)
         {
             if (package == null)
@@ -45,7 +45,7 @@ namespace ISCop.Rules
                             if (accesModeProp.Value == SourceAccessMode.OpenRowSet
                                 || accesModeProp.Value == SourceAccessMode.OpenRowSetVariable)
                             {
-                                var msg = string.Format(CultureInfo.CurrentCulture, "Change the {0} component to use a SQL Command access mode, as this performs better than the OpenRowset access mode.", comp.Name);
+                                var msg = string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, comp.Name, this.Description);
                                 this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, comp.Name));
                             }
                         }

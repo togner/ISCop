@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.SqlServer.Dts.Runtime;
 
 namespace ISCop
@@ -9,6 +10,7 @@ namespace ISCop
         public string Id { get; protected set; }
         public string Name { get; protected set; }
         public string Description { get; protected set; }
+        protected string ResultMessageFormat { get; set; }
 
         protected PackageRule()
         {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.SqlServer.Dts.Pipeline.Wrapper;
 using Microsoft.SqlServer.Dts.Runtime;
 
@@ -8,12 +9,12 @@ namespace ISCop.Rules
     {
         public DataflowCount()
         {
-            this.Id = "BIDS0002";
-            this.Name = "DataFlowCount";
-            this.Description = "Checks for the number of data flows in the package";
+            this.Id = "IS0105";
+            this.Name = "DataflowCount";
+            this.Description = "Consider using only one data flow per package to improve maintenance.";
+            this.ResultMessageFormat = "There are {0} data flows in the package. {1}";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ISCop.Result.#ctor(ISCop.ResultType,System.String,System.String,System.String,System.String,System.String,System.Int32)")]
         public override void Check(Package package)
         {
             if (package == null)
@@ -23,7 +24,7 @@ namespace ISCop.Rules
             List<TaskHost> pipelines = package.GetControlFlowObjects<MainPipe>();
             if (pipelines.Count > 1)
             {
-                var msg = "There are " + pipelines.Count + " data flows in the package. For simplicity, encapsulation, and to facilitate team development, consider using only one data flow per package.";
+                var msg = string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, pipelines.Count, this.Description);
                 this.Results.Add(new Result(ResultType.Information, this.Id, this.Name, msg, package.Name, null, -1));
             }
         }

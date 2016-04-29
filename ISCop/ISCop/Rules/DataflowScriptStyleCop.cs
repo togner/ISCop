@@ -47,9 +47,9 @@ namespace ISCop.Rules
                             var result = new Result(ResultType.Warning,
                                 violation.Item1.Rule.CheckId,
                                 violation.Item1.Rule.Name,
-                                message + " To suppress: " + violation.Item2,
+                                string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, message, violation.Item2),
                                 package.Name,
-                                string.Format(CultureInfo.CurrentCulture, "{0} ({1})", comp.Name, pipe.Name),
+                                string.Format(CultureInfo.CurrentCulture, ScriptTaskStyleCop.ResultSourceFormat, comp.Name, pipe.Name),
                                 violation.Item1.Line);
                             this.Results.Add(result);
                         }
