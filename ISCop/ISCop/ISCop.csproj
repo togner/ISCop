@@ -42,6 +42,7 @@
     <Reference Include="Microsoft.SqlServer.DTSPipelineWrap, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.SqlServer.ExecProcTask, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SQLServer.ManagedDTS, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SqlServer.ScriptTask, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SqlServer.VSTAScriptingLib, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -69,6 +70,7 @@
     <Compile Include="Result.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Rules\ExecuteProcessTaskLogging.cs" />
     <Compile Include="Rules\DataflowScriptStyleCop.cs" />
     <Compile Include="Rules\DataflowScriptCSharp.cs" />
     <Compile Include="Rules\TaskProperties.cs" />

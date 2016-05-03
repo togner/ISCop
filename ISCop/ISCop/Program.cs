@@ -108,6 +108,7 @@ namespace ISCop
                     // Custom rules
                     foreach (var rule in new PackageRule[]
                     {
+                        new ExecuteProcessTaskLogging(),
                         new DataflowScriptStyleCop(styleCopSettingsPath),
                         new DataflowScriptCSharp(),
                         new DataflowCount(),
@@ -119,7 +120,7 @@ namespace ISCop
                         new TaskProperties(),
                         new ScriptTaskCSharp(),
                         new ScriptTaskStyleCop(styleCopSettingsPath)
-                    })
+                    }.OrderBy(r => r.Id))
                     {
                         rule.Check(pkg);
                         foreach (var result in rule.Results)
