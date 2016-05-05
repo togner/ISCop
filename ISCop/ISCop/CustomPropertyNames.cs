@@ -6,5 +6,6 @@
         public const string AccessMode = "AccessMode";
         public const string ScriptLanguage = "ScriptLanguage";
         public const string SourceCode = "SourceCode";
+        public const string FastLoadOptions = "FastLoadOptions";
     }
 }

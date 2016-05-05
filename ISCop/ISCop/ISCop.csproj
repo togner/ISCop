@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessMode.cs" />
     <Compile Include="CustomPropertyNames.cs" />
     <Compile Include="DtsExtensions.cs" />
     <Compile Include="ComponentInfo.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Result.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Rules\DataflowFastLoadCheckConstraints.cs" />
     <Compile Include="Rules\ExecuteProcessTaskLogging.cs" />
     <Compile Include="Rules\DataflowScriptStyleCop.cs" />
     <Compile Include="Rules\DataflowScriptCSharp.cs" />

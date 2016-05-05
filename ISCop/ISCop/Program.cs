@@ -108,6 +108,7 @@ namespace ISCop
                     // Custom rules
                     foreach (var rule in new PackageRule[]
                     {
+                        new DataflowFastLoadCheckConstraints(),
                         new ExecuteProcessTaskLogging(),
                         new DataflowScriptStyleCop(styleCopSettingsPath),
                         new DataflowScriptCSharp(),

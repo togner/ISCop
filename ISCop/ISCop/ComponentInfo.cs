@@ -13,6 +13,7 @@ namespace ISCop
         public const string AdoNetSourceName = "ADO NET Source";
         public const string LookupName = "Lookup";
         public const string ScriptName = "Script Component";
+        public const string OleDbDestinationName = "OLE DB Destination";
         private const string ManagedComponentClassID = "{874F7595-FB5F-40FF-96AF-FBFF8250E3EF}";
 
         public string Id { get; protected set; }
