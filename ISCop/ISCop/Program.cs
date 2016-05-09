@@ -63,12 +63,40 @@ namespace ISCop
                         packageName = null;
                     }
 
+                    var summaryArg = arguments["summary"];
+                    var showSummary = false;
+                    var summaryTopN = -1;
+                    if (!string.IsNullOrEmpty(summaryArg))
+                    {
+                        showSummary = true;
+                        if (!int.TryParse(summaryArg, out summaryTopN))
+                        {
+                            summaryTopN = -1;
+                        }
+                    }
+                    var summary = new Dictionary<ResultType, int>
+                    {
+                        { ResultType.Error, 0 },
+                        { ResultType.Warning, 0 },
+                        { ResultType.Information, 0 }
+                    };
+
                     // A: Open project as ispac (needs to be built)
                     // B: Create new project, load proj param, cm from xml files - https://social.msdn.microsoft.com/Forums/sqlserver/en-US/ff62aafa-3b19-46e3-839e-8353bf4ab6df/problem-loading-ssis-project-parameters-out-of-projectparams-file?forum=sqlintegrationservices
                     // Load dtsx - does it get the project configs (cm, parameters) automagically?
+                    var resultCount = 0;
                     foreach (var result in Program.Analyze(ispacPath, styleCopSettingsPath, packageName))
                     {
-                        result.Log(Program.Logger);
+                        summary[result.Severity] = summary[result.Severity] + 1;
+                        if (resultCount < summaryTopN)
+                        {
+                            result.Log(Program.Logger);
+                        }
+                        resultCount++;
+                    }
+                    if (showSummary)
+                    {
+                        Program.Logger.InfoFormat("Error: {0} Warning: {1} Info: {2}", summary[ResultType.Error], summary[ResultType.Warning], summary[ResultType.Information]);
                     }
                 }
             }
@@ -141,7 +169,7 @@ namespace ISCop
             }
             Program.Logger.Info(
 @"Usage:
-    ISCop.exe -ispac:<path to .ispac file> [-scop:<path to Settings.StyleCop>] [-pkg:<package name>] 
+    ISCop.exe -ispac:<path to .ispac file> [-scop:<path to Settings.StyleCop>] [-pkg:<package name>]  [-summary[:<top n violations>]]
 ");
         }
     }
