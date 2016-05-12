@@ -88,7 +88,7 @@ namespace ISCop
                     foreach (var result in Program.Analyze(ispacPath, styleCopSettingsPath, packageName))
                     {
                         summary[result.Severity] = summary[result.Severity] + 1;
-                        if (resultCount < summaryTopN)
+                        if (summaryTopN < 0 || resultCount < summaryTopN)
                         {
                             result.Log(Program.Logger);
                         }
