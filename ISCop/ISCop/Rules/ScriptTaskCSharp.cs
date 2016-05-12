@@ -13,7 +13,7 @@ namespace ISCop.Rules
             this.Id = "IS0001";
             this.Name = "ScriptTaskCSharp";
             this.Description = "Every script task must be written in C#.";
-            this.ResultMessageFormat = "Script component {0} is written in {1}. {2}";
+            this.ResultMessageFormat = "Script component \"{0}\" is written in {1}. {2}";
         }
 
         public override void Check(Package package)

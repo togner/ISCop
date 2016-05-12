@@ -12,7 +12,7 @@ namespace ISCop.Rules
             this.Id = "IS104";
             this.Name = "DataflowAsynchronousPaths";
             this.Description = "Too many asynchronous outputs can adversely impact performance.";
-            this.ResultMessageFormat = "There are {0} asynchronous outputs in the {1} data flow. {2}";
+            this.ResultMessageFormat = "There are \"{0}\" asynchronous outputs in \"{1}\" data flow. {2}";
         }
 
         public override void Check(Package package)
@@ -37,10 +37,10 @@ namespace ISCop.Rules
                         asyncCount++;
                     }
                 }
-                if (asyncCount > 0)
+                if (asyncCount > 1)
                 {
                     var msg = string.Format(CultureInfo.CurrentCulture, this.ResultMessageFormat, asyncCount, pipe.Name, this.Description);
-                    this.Results.Add(new Result(ResultType.Warning, this.Id, this.Name, msg, package.Name, pipe.Name, -1));
+                    this.Results.Add(new Result(ResultType.Information, this.Id, this.Name, msg, package.Name, pipe.Name, -1));
                 }
             }
         }

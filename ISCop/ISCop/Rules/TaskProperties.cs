@@ -5,9 +5,9 @@ namespace ISCop.Rules
 {
     public class TaskProperties : PackageRule
     {
-        private const string ForceExecutionResultResultMessageFormat = "Task {0} should have ForceExecutionResult=None but it's {1}. {2}";
-        private const string FailPackageOnFailureResultMessageFormat = "Task {0} should have FailPackageOnFailure set to true. {1}";
-        private const string FailParentOnFailureResultMessageFormat = "Task {0} should have FailParentOnFailure set to true. {1}";
+        private const string ForceExecutionResultResultMessageFormat = "Task \"{0}\" should have ForceExecutionResult=None but it's {1}. {2}";
+        private const string FailPackageOnFailureResultMessageFormat = "Task \"{0}\" should have FailPackageOnFailure set to true. {1}";
+        private const string FailParentOnFailureResultMessageFormat = "Task \"{0}\" should have FailParentOnFailure set to true. {1}";
         public TaskProperties()
         {
             this.Id = "IS0003";

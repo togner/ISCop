@@ -10,7 +10,7 @@ namespace ISCop.Rules
         {
             this.Id = "IS0108";
             this.Name = "DataflowFastLoadCheckConstraints";
-            this.Description = "If the destination uses Fast Load, it must have Check constraints option set. Otherwise the constraints will become NOCHECK.";
+            this.Description = "If the destination uses Fast Load, it must have Check Constraints option set. Otherwise the constraints will become NOCHECK.";
             this.ResultMessageFormat = "Destination component \"{0}\" doesn't set CHECK_CONSTRAINTS. {1}";
         }
 
